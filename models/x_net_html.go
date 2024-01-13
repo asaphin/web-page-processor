@@ -14,6 +14,7 @@ type HTMLWrapper struct {
 	doc      *html.Node
 	rawBytes []byte
 	headers  map[string][]string
+	meta     []map[string]string
 }
 
 func WrapHTML(rawURL string, data []byte, headers map[string][]string) (app.HTML, error) {
@@ -27,11 +28,14 @@ func WrapHTML(rawURL string, data []byte, headers map[string][]string) (app.HTML
 		return nil, err
 	}
 
+	meta := getMeta(doc)
+
 	return &HTMLWrapper{
 		url:      parsedURL,
 		doc:      doc,
 		rawBytes: data,
 		headers:  headers,
+		meta:     meta,
 	}, nil
 }
 
@@ -48,6 +52,19 @@ func (h *HTMLWrapper) Title() string {
 	})
 
 	return title
+}
+
+func (h *HTMLWrapper) Description() (description string) {
+	for _, m := range h.meta {
+		for k, v := range m {
+			if k == "name" && v == "description" {
+				description = m["content"]
+				return
+			}
+		}
+	}
+
+	return
 }
 
 func (h *HTMLWrapper) Language() string {
@@ -102,9 +119,13 @@ func (h *HTMLWrapper) Bytes() []byte {
 }
 
 func (h *HTMLWrapper) Meta() []map[string]string {
+	return h.meta
+}
+
+func getMeta(n *html.Node) []map[string]string {
 	var metaParamsList []map[string]string
 
-	dfs(h.doc, func(n *html.Node) (terminate bool) {
+	bfs(n, func(n *html.Node) (terminate bool) {
 		if n.Type == html.ElementNode && n.Data == "meta" {
 			metaParams := make(map[string]string)
 			for _, attribute := range n.Attr {

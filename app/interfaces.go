@@ -8,6 +8,7 @@ type URLGetter interface {
 
 type HTML interface {
 	Title() string
+	Description() string
 	Language() string
 	Links() []string
 	Bytes() []byte

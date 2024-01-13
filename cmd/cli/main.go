@@ -10,7 +10,7 @@ import (
 func main() {
 	var startPageURL string
 
-	flag.StringVar(&startPageURL, "page", "https://www.youtube.com/", "Web page to start processing")
+	flag.StringVar(&startPageURL, "page", "https://www.rewater.io/", "Web page to start processing")
 
 	flag.Parse()
 
@@ -21,15 +21,23 @@ func main() {
 		panic(err)
 	}
 
+	fmt.Println("\nTitle:")
 	fmt.Println(h.Title())
+
+	fmt.Println("\nLanguage:")
 	fmt.Println(h.Language())
 
+	fmt.Println("\nDescription:")
+	fmt.Println(h.Description())
+
+	fmt.Println("\nLinks:")
 	links := h.Links()
 
 	for _, link := range links {
 		fmt.Println(link)
 	}
 
+	fmt.Println("\nMeta:")
 	for _, meta := range h.Meta() {
 		for key, value := range meta {
 			fmt.Printf("%s: %s\n", key, value)
@@ -37,10 +45,12 @@ func main() {
 		fmt.Println()
 	}
 
+	fmt.Println("\nTable of contents:")
 	for _, header := range h.TableOfContents() {
 		fmt.Printf("%d. %s\n", header.Level, header.Title)
 	}
 
+	fmt.Println("\nResponse headers:")
 	for name, values := range h.ResponseHeaders() {
 		fmt.Printf("%s: %s\n", name, strings.Join(values, ", "))
 	}
